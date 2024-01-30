@@ -1,0 +1,66 @@
+nav ul li p {
+    color: white;
+    text-align: center;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #6297c0;
+}
+
+nav li {
+    float: left;
+}
+
+nav li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav li a:hover {
+    background-color: #111;
+}
+
+table {
+    border-collapse: collapse;
+}
+table th, tr, td {
+   border: solid thin blue;
+}
+table th {
+    background-color: lightgray;
+}
+
+form * {
+    float: left;
+}
+
+form fieldset {
+    float: left;
+    clear: left;
+}
+
+form label {
+    clear: left;
+    min-width: 5em;
+}
+
+table a {
+    text-decoration: none;
+}
+
+table a:hover {
+    color:brown;
+}
+
+.alert {
+    background-color: #58d4ce;
+    color: yellow;
+    float: left;
+}
