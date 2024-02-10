@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
         $_SESSION["username"] = $credentials->getUsername();
         $_SESSION["role"] = $credentials->getRole();
+        $_SESSION["userData"] = serialize($credentials);
   
         //var_dump($_SESSION["username"]);
         // Redirect after setting session

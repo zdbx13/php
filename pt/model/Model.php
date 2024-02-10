@@ -5,6 +5,9 @@ require_once 'persist/UserArrayDao.php';
 require_once 'Product.php';
 require_once 'persist/ProductArrayDao.php';
 
+require_once 'Order.php';
+require_once 'persist/OrderArrayDao.php';
+
 /**
  * Service class to provide data.
  * @author Martí
@@ -15,12 +18,14 @@ class Model {
      * ADO class to get access to data souce.
      * @var UserDaoInterface 
      */
-    private  $userDataSource;
+    private $userDataSource;
     private $productDataSource;
+    private $orderDataSource;
  
     public function __construct() {
         $this->userDataSource = UserArrayDao::getInstance();        
         $this->productDataSource = ProductArrayDao::getInstance();
+        $this->orderDataSource = OrderArrayDao::getInstance();
     }
 
 
@@ -301,4 +306,21 @@ class Model {
     }
 
 
+
+
+    /**
+    * -------------------------------
+    * ORDER
+    * -------------------------------
+    */
+
+    /**
+     * finds all diferents delivery methods in orders table.
+     * @return array list of orders or empty array if none found.
+     */
+    public function selectDelMethods():array {
+        $order = $this->orderDataSource->selectDelMethods();
+        return $order;
+    }
+    
 }

@@ -37,13 +37,16 @@ class MainController {
         if (filter_has_var(INPUT_GET, "action")){
             $this->action = filter_input(INPUT_GET, "action");
         }
-        //var_dump($this->action);
+        var_dump($this->action);
     
         switch ($this->action) {
             case "home":
                 $this->home();
                 break;
-            
+            case "cart":
+                $this->cart();
+                break;
+    
             case "listAllUsers":
                 $this->listAllUsers();
                 break;
@@ -86,6 +89,10 @@ class MainController {
                 $this->buyProduct();
                 break;
 
+            case "cancelBuyForm":
+                $this->cancelOrder();
+                break;
+
             case "removeProduct":
                 $this->removeProduct();
                 break;
@@ -126,6 +133,12 @@ class MainController {
         $this->view->show("login.php", null);
     }
 
+    /** Show cart page */
+    public function cart(){
+        $this->view->show("cart.php", null);
+    }
+
+
     /** Show users list page */
     public function listAllUsers(){
         $userList = $this->Model->selectAllUsers();
@@ -134,7 +147,7 @@ class MainController {
     }
 
 
-    /** Show users list page */
+    /** Show products list page */
     public function listAllProducts(){
         $productList = $this->Model->selectAllProducts();
         $data["productList"] = $productList;
@@ -152,6 +165,7 @@ class MainController {
         session_unset();
         session_destroy();
         header("Location: index.php");
+        //$this->home();
     }
 
     
@@ -169,7 +183,7 @@ class MainController {
     /** Update the product data */
     public function update(){
 
-        var_dump($_POST);
+        //var_dump($_POST);
         $id = $_POST["id"];
         $code = $_POST["code"];
         $desc = $_POST["Description"];
@@ -232,6 +246,8 @@ class MainController {
      * Check the product quantity is more than 1 and save data in the session.
      */
     public function buyProduct(){
+
+        /** Start session if not started */
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_name("login");
             session_start();
@@ -252,9 +268,28 @@ class MainController {
 
         } else {
 
-            // Save the data in session
-            $_SESSION["buyProduct"] = $product;
-            $_SESSION["buyQuantity"] = $quantity;
+            // Defina an array and the session to save the cart data.
+            $sessionData = array();
+            $_SESSION["buyProduct"] = isset($_SESSION["buyProduct"]) ? $_SESSION["buyProduct"] : null;
+            
+            /** If the session is null create an array of arrays and save the firts product in the session. */
+            if ($_SESSION["buyProduct"] == null) {
+                $sessionData[] = array($product, $quantity);
+                $_SESSION["buyProduct"] = serialize($sessionData);
+                //var_dump($_SESSION["buyProduct"]);
+
+            /** If session is not null add the new product data in the end of the session. */
+            } else {
+
+                $productsList = $_SESSION["buyProduct"];
+                $sessionData = array($product, $quantity);
+                $updatedList = array_merge($productsList, array($sessionData));
+
+                //var_dump($updatedList);
+                $_SESSION["buyProduct"] = serialize($updatedList);
+                //var_dump($_SESSION["buyProduct"]);
+            }
+            
 
             $_SESSION["buyError"] = "Product added to the cart";
         }
@@ -266,5 +301,21 @@ class MainController {
         $this->listAllProducts();
 
     }
+
+
+    public function cancelOrder(){
+        /** Start session if not started */
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_name("login");
+            session_start();
+        }
+
+        unset($_SESSION["buyProduct"]);
+
+        $this->home();       
+        
+    }
+
+
 
 }

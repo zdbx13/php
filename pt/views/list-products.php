@@ -18,6 +18,14 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION["role"]) && $_SES
 ?>
 
 <script>
+/** Confirm to delete and submit the form */
+function confirmDelete(productId) {
+    var confirmDelete = confirm("Are you sure you want to delete?");
+    if (confirmDelete) {
+        var form = document.getElementById("removeForm" + productId);
+        form.submit();
+    }
+}
 
 /** submit the update form action */
 /*function updateProduct(id) {
@@ -154,7 +162,7 @@ foreach ($productList as $product) {
         echo "<form method='post' id='removeForm{$product->getId()}'>";
         echo "<input type='hidden' name='id' value='{$product->getId()}'>";
         echo "<input type='hidden' name='action' value='removeProduct'>";
-        echo "<td><input type='submit' value='Remove' onclick='confirmDelete({$product->getId()})'></td>";
+        echo "<td><input type='button' value='Remove' onclick='confirmDelete({$product->getId()})'></td>";
         echo "</form>";
 
         // Update button
