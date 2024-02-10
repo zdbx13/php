@@ -1,8 +1,8 @@
 <script type="text/javascript">
 /** Manage form actions and submit the form*/
 function submitForm(action) {
-    var myForm = document.getElementById('product-form');
-    var actionInput = document.getElementById('action');
+    let myForm = document.getElementById('product-form');
+    let actionInput = document.getElementById('action');
 
     if (action === 'update') {
         myForm.action = 'index.php?action=update';
@@ -34,24 +34,6 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION["role"]) && $_SES
 }
 
 
-$error = null;
-
-/** If acction is update , upate the product data and redirect to all products list*/
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
-   
-    $product = new Product((int)$_POST["id"],$_POST["code"], $_POST["Description"], $_POST["price"]);
-    $update = (new Model())->updateProduct($product);
-
-    if ($update){
-        $_SESSION["updated"] = "Product ".$product->getCode()." updated";
-        header("Location: index.php?action=listAllProducts");
-
-    } else {
-        $error = "Product not updated";
-    }
-}
-
-
 /** If action is cancel show all products list  */
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'cancel') {
 
@@ -69,7 +51,7 @@ if (is_null($product)) {
 echo <<<EOT
    <form id="product-form" method="post">
     <fieldset>
-        <label for="id">Id: </label><input type="text" name="id" id="id" placeholder="enter id" value="{$product->getId()}" />
+        <input type="hidden" name="id" id="id" placeholder="enter id" value="{$product->getId()}"/>
         <label for="code">code: </label><input type="text" name="code" id="code" placeholder="enter code" value="{$product->getCode()}"/>
         <label for="Description">Description: </label><input type="text" name="Description" id="Description" placeholder="enter Description" value="{$product->getDescription()}"/>
         <label for="Price">Price: </label><input type="text" name="price" id="price" placeholder="enter price" value="{$product->getPrice()}"/>
@@ -83,10 +65,14 @@ echo <<<EOT
     </fieldset>
 EOT;
 
+echo "</form>";
 
 /** Show an error message  */
-if (isset($error) && $error != null) {
-    echo "<label></label>";
-    echo "<p>Error: {$error}</p>";
+$message = null;
+
+if (isset($_SESSION["updateError"])){
+    $message = $_SESSION["updateError"];
+    unset($_SESSION["updateError"]);
 }
-echo "</form>";
+echo "<br><br><br><br><br><br><br>".$message;
+

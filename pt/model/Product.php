@@ -18,16 +18,16 @@ class Product{
         return $this->id;
     }
 
-    public function setId(?int $id):?int{
-        return $this->id = $id;
+    public function setId(?int $id){
+        $this->id = $id;
     }
 
     public function getCode():?string{
         return $this->code;
     }
 
-    public function setCode(?string $code):?string{
-        return $this->code = $code;
+    public function setCode(?string $code){
+        $this->code = $code;
     }
 
 
@@ -35,8 +35,8 @@ class Product{
         return $this->description;
     }
 
-    public function setDescriptoin(?string $description):?string{
-        return $this->description = $description;
+    public function setDescriptoin(?string $description){
+         $this->description = $description;
     }
 
 
@@ -44,8 +44,8 @@ class Product{
         return $this->price;
     }
 
-    public function setPrice(?float $price):?float{
-        return $this->price = $price;
+    public function setPrice(?float $price){
+        $this->price = $price;
     }
 
     public function __toString() {

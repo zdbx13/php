@@ -12,11 +12,16 @@ if (isset($_SESSION["username"])) {
 
     //var_dump($_SESSION["username"]);
     //var_dump($_SESSION["role"]);
+    
+    if (isset($_SESSION["role"]) && $_SESSION["role"] == "registered"){
+        echo "<li><a href='index.php?action=cart'>Cart</a></li>";
+    }
 
     // If user is admin show the listAllUsers page
     if (isset($_SESSION["role"]) && $_SESSION["role"] == "admin"){
         echo "<li><a href='index.php?action=listAllUsers'>List all users</a></li>";
     }
+    
     echo "<li><a href='index.php?action=logout'>Logout</a></li>";
     echo "<li><p>". $_SESSION["username"]."</p></li>";
 

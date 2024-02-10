@@ -1,6 +1,4 @@
 <?php
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
 require_once 'model/Model.php';
 require_once 'UserDaoInterface.php';
 require_once 'DbConnection.php';
@@ -12,12 +10,11 @@ class UserPdoDbDao implements UserDaoInterface {
     private $connection;
     private static $TABLE_NAME = 'users';
     private $queries;
-    
+
     private function __construct() {
         try {
             //PDO object creation.
-            $this->connection = (new DbConnection())->getConnection();  
-              
+            $this->connection = DbConnection::getInstance()->getConnection();
             //query definition.
             $this->queries['SELECT_ALL'] = \sprintf(
                     "select * from %s", 
@@ -49,6 +46,8 @@ class UserPdoDbDao implements UserDaoInterface {
             );
             
         } catch (PdoException $e) {
+            echo "Connection failed: " . $e->getMessage();
+        
             print "Error Code <br>".$e->getCode();
             print "Error Message <br>".$e->getMessage();
             print "Strack Trace <br>".nl2br($e->getTraceAsString());

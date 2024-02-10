@@ -19,7 +19,7 @@ class MainController {
     }
 
     public function processRequest(){
-        //var_dump($_SERVER['REQUEST_METHOD']);
+        var_dump($_SERVER['REQUEST_METHOD']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $this->processGetRequest();
@@ -59,7 +59,7 @@ class MainController {
             case "listAllProducts":
                 $this->listAllProducts();
                 break;
-
+            
             default:
                 $this->home();
                 break;
@@ -79,14 +79,17 @@ class MainController {
         }
 
         //var_dump($_POST);
-        //var_dump($this->action);
+        var_dump($this->action);
 
         switch ($this->action) {
-
-            case "removeProduct":
-                $this->listAllProducts();
+            case "buyProduct":
+                $this->buyProduct();
                 break;
 
+            case "removeProduct":
+                $this->removeProduct();
+                break;
+            
             case "cancel":
                 $this->listAllProducts();
                 break;
@@ -105,6 +108,7 @@ class MainController {
                 $this->listSelectProducts();
                 break;
 
+            
             default:  
                 $this->home();
                 break;
@@ -160,10 +164,38 @@ class MainController {
         $this->view->show("update-product.php",$data);
     }
 
-    /** Show the list all products*/
+
+
+    /** Update the product data */
     public function update(){
-        $this->listAllProducts();
+
+        var_dump($_POST);
+        $id = $_POST["id"];
+        $code = $_POST["code"];
+        $desc = $_POST["Description"];
+        $price = $_POST["price"];
+        
+        $product = new Product($id,$code,$desc,$price);
+
+        $codeUsed = $this->Model->selectProductCode(new Product(0,$code));
+        $productId = $this->Model->selectProductId(new Product($id));
+
+        if(!$codeUsed){
+            $this->Model->updateProduct($product);
+            $this->listAllProducts();
+            $_SESSION["updated"] = "Product " . $code. " updated.";
+
+        } elseif($code == $productId->getCode()){
+            $this->Model->updateProduct($product);
+            $this->listAllProducts();
+            $_SESSION["updated"] = "Product " . $code. " updated.";
+
+        } else {
+            $_SESSION["updateError"] = "Code " . $code . " already in use.";
+            $this->updateProduct($product);
+        }    
     }
+
 
     /** Show the form to add a new product */
     public function addProduct(){
@@ -174,6 +206,65 @@ class MainController {
     public function listSelectProducts(){
         $data = isset($_SESSION["search_results"]) ? $_SESSION["search_results"] : null;
         $this->view->show("list-products.php", $data);
+    }
+
+    
+    /**
+     * Delete the product selected
+     */
+    public function removeProduct(){
+        $product = $this->Model->selectProductId(new Product($_POST["id"]));
+        $delete = $this->Model->deleteProduct($product);
+
+        if ($delete){
+            $_SESSION["deleted"] = "Product " .$product->getCode(). " deleted.";
+            //(new MainController())->listAllProducts();
+    
+        } else {
+            $_SESSION["deleted"] = "An error ocurred";
+        }
+
+        $this->listAllProducts();
+    }
+
+
+    /**
+     * Check the product quantity is more than 1 and save data in the session.
+     */
+    public function buyProduct(){
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_name("login");
+            session_start();
+        }
+
+        $id = $_POST["id"];
+        $quantity = $_POST["quantity"];
+        $error = null;
+
+        if ($quantity <1){
+            $error = "The minimum number must be 1";
+        }
+
+        $product = $this->Model->selectProductId(new Product((int)$id));
+
+        if ($error){
+            $_SESSION["buyError"] = $error;
+
+        } else {
+
+            // Save the data in session
+            $_SESSION["buyProduct"] = $product;
+            $_SESSION["buyQuantity"] = $quantity;
+
+            $_SESSION["buyError"] = "Product added to the cart";
+        }
+        
+        //var_dump($_POST["action"]);
+        //var_dump($quantity);
+        //var_dump($product);
+
+        $this->listAllProducts();
+
     }
 
 }

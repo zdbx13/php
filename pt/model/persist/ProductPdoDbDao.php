@@ -16,7 +16,7 @@ class ProductPdoDbDao implements ProductDaoInterface {
     private function __construct() {
         try {
             //PDO object creation.
-            $this->connection = (new DbConnection())->getConnection();  
+            $this->connection = DbConnection::getInstance()->getConnection();
               
             //query definition.
             $this->queries['SELECT_ALL'] = \sprintf(
@@ -239,22 +239,19 @@ class ProductPdoDbDao implements ProductDaoInterface {
     public function update(Product $product): bool {
         $numAffected = false;
 
-        $exist = $this->selectCode($product);
-        if (!$exist){
-        
-            try {
-                $stmt = $this->connection->prepare($this->queries['UPDATE']);
-                $stmt->bindValue(':id', $product->getId(), PDO::PARAM_INT);
-                $stmt->bindValue(':code', $product->getCode(), PDO::PARAM_STR);
-                $stmt->bindValue(':description', $product->getDescription(), PDO::PARAM_STR);
-                $stmt->bindValue(':price', $product->getPrice(), PDO::PARAM_INT);
+        try {
+            $stmt = $this->connection->prepare($this->queries['UPDATE']);
+            $stmt->bindValue(':id', $product->getId(), PDO::PARAM_INT);
+            $stmt->bindValue(':code', $product->getCode(), PDO::PARAM_STR);
+            $stmt->bindValue(':description', $product->getDescription(), PDO::PARAM_STR);
+            $stmt->bindValue(':price', $product->getPrice(), PDO::PARAM_INT);
 
-                $success = $stmt->execute();
-                $numAffected = $success?true:false;
-            } catch (PDOException $e) {
-                $numAffected = false;
-            }
+            $success = $stmt->execute();
+            $numAffected = $success?true:false;
+        } catch (PDOException $e) {
+            $numAffected = false;
         }
+        
         return $numAffected;  
     }
 

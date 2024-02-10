@@ -40,15 +40,31 @@ $error = null;
 /** If action is  addProduct and have $_POST data add new product*/
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'addProduct' && isset($_POST['code']) && $_POST["code"] != "" && $_POST["Description"] != "" && $_POST["price"] != "") {    
 
-    $product = new Product(0,$_POST["code"], $_POST["Description"], (float)$_POST["price"]);
-    $add = (new Model())->insertProduct($product);
+    $regex ='/^[0-9]+\.?[0-9]*$/';
 
-    if ($add){
-        $_SESSION["added"] = "Product ".$product->getCode()." added";
-        header("Location: index.php?action=listAllProducts");  
+    if (preg_match($regex, $_POST["price"])){
+        $code = new Product(0,$_POST["code"]);
+        $exist = (new Model())->selectProductCode($code);
+        
+        if (!$exist){
+            $product = new Product(0,$_POST["code"], $_POST["Description"], (float)$_POST["price"]);
+            $add = (new Model())->insertProduct($product);
+
+            if ($add){
+                $_SESSION["added"] = "Product ".$product->getCode()." added";
+                header("Location: index.php?action=listAllProducts");  
+            } else {
+                $error = "Product not added";
+            }
+        } else {
+            $error = "Product code already exist";
+        }
     } else {
-        $error = "Product not added";
-    }   
+        $error = "Price must be a number. If is a decimal number add '.' to indiacte this.";
+    }
+
+
+  
 }
 
 

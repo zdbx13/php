@@ -275,8 +275,7 @@ class Model {
             if ($check){
                 $update = $this->productDataSource->update($product);
             }
-        }
-        
+        }   
         return $update;
     }
 

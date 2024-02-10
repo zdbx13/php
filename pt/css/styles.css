@@ -64,3 +64,11 @@ table a:hover {
     color: yellow;
     float: left;
 }
+
+#actionBuy{
+    display: flex;
+    justify-content: center;
+    border: solid thin blue;
+    border-collapse: collapse;
+
+}

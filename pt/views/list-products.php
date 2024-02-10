@@ -8,66 +8,49 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_name("loginSession");
     session_start();
 }
+
+
+/** If not admin redirect to index.php */
+if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION["role"]) && $_SESSION["role"] == null ) {
+    header("Location: index.php");
+    exit();
+}
 ?>
 
 <script>
 
-/** Confirm to delete and submit the form */
-function confirmDelete(productId) {
-    var confirmDelete = confirm("Are you sure you want to delete?");
-    if (confirmDelete) {
-        var form = document.getElementById("removeForm" + productId);
-        form.submit();
-    }
-}
-
 /** submit the update form action */
-function updateProduct(id) {
-    var form = document.getElementById("updateForm" + id);
+/*function updateProduct(id) {
+    let form = document.getElementById("updateForm" + id);
     form.submit();
-}
+}*/
 
 /** Submit add form */
 function addProduct() {
-    var form = document.getElementById("addProduct");
+    let form = document.getElementById("addProduct");
     form.submit();
 }
 
 /** Submit search value */
 function searchProduct() {
-    var form = document.getElementById("searchProductForm");
+    let form = document.getElementById("searchProductForm");
     form.submit();
 }
+
 </script>
 
 <h2>List all Products</h2>
 
 <?php
-/** If action si removeProduct delete the product and reload the list all products page  */
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'removeProduct') {
-    
-    $productId = new Product((int)$_POST["id"]);
-    $product = (new Model())->selectProductId($productId);
-    $delete = (new Model())->deleteProduct($product);
-    
-    if ($delete){
-        $_SESSION["deleted"] = "Product " .$product->getCode(). " deleted.";
-    } else {
-        $_SESSION["deleted"] = "An error ocurred";
-    }
-    
-    header("Location: index.php?action=listAllProducts");
-}
-
 /** If action is update update product */
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
+/*if (isset($_SESSION["role"]) && $_SESSION["role"] != "admin" && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
             
     (new MainController())->updateProduct(new Product($_POST["id"]));
     exit();
-}
+}*/
 
 /** If action is addProduct  */
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'addProduct') {
+if (isset($_SESSION["role"]) && $_SESSION["role"] != "admin" && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'addProduct') {
     
     (new MainController())->addProduct();
     //header("Location: index.php?action=updateProduct");
@@ -85,25 +68,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $_SESSION["search_results"] = $products; 
 }
 
+  
+// Search bar
+echo "<div class='search-container'>";
+echo "<form method='post' id='searchProductForm' action='index.php'>";
+echo "<input type='text' placeholder='Search description...' name='search'>";
+echo "<input type='hidden' name='action' value='searchProduct'>";
+echo "<button type='button' value='search' onclick='searchProduct()'>Search</button>";
+echo "</form>";
+echo "</div>";
 
-/** If user role is admin show the search bar and the add button */
+/** If user role is admin show the add button */
 if (isset($_SESSION["role"]) && $_SESSION["role"] == "admin") {
-    
-    // Search bar
-    echo "<div class='search-container'>";
-    echo "<form method='post' id='searchProductForm' action='index.php'>";
-    echo "<input type='text' placeholder='Search description...' name='search'>";
-    echo "<input type='hidden' name='action' value='searchProduct'>";
-    echo "<button type='button' value='search' onclick='searchProduct()'>Search</button>";
-    echo "</form>";
-    echo "</div>";
-
     // Add button
     echo "<form method='post' id='addProduct'>";
     echo "<input type='hidden' name='action' value='addProduct'>";
     echo "<input type='button' value='add' onclick='addProduct()'>";
     echo "</form>";
-    echo "<br><br>";
 }
 
 
@@ -116,24 +97,26 @@ $productList = null;
   */
 if (isset($_SESSION["search_results"]) && is_array($_SESSION["search_results"]) && !empty($_SESSION["search_results"])) {
 
-    var_dump($_SESSION["search_results"]);
+    //var_dump($_SESSION["search_results"]);
     $productList = $_SESSION["search_results"];
     unset($_SESSION["search_results"]);
 
-} elseif (isset($params["productList"])) {
+} elseif (isset($params["productList"]) && !empty($params["productList"])) {
     $productList = $params["productList"];
 
 } else {
+
+    if (isset($_POST["action"]) && $_POST["action"] == "searchProduct" ){
     $_SESSION["search_show"] = "Product not found";
-    
+    }
     $productList = [new Product(null,null,null,null)];
 }
 
 // Show table data
-echo "<table>";
+echo "<br><br><table>";
 echo "<tr>";
 //echo "<th>Id</th>";
-echo "<th>Code</th>";
+echo "<th>Code</th>";   
 echo "<th>Description</th>";
 echo "<th>Price</th>";
 
@@ -142,6 +125,10 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] == "admin") {
     echo "<th colspan='2'>Actions</th>";
 }
 
+if (isset($_SESSION["role"]) && $_SESSION["role"] == "registered") {
+    echo "<th>Quantity</th>";
+    echo "<th>Actions</th>";
+}
 echo "</tr>";
 
 foreach ($productList as $product) {
@@ -152,7 +139,13 @@ foreach ($productList as $product) {
     //echo "<td><input type='text' disabled name='id' value='{$product->getId()}'></td>";
     echo "<td><input type='text' disabled name='code' value='{$product->getCode()}'></td>";
     echo "<td><input type='text' disabled name='description' value='{$product->getDescription()}'></td>";
-    echo "<td><input type='text' disabled name='product' value='{$product->getPrice()}'></td>";
+    echo "<td><input type='text' disabled name='price' value='{$product->getPrice()}€'></td>";
+
+    if (isset($_SESSION["role"]) && $_SESSION["role"] == "registered" && $product->getId() != null) {
+        
+        // Quntity field
+        //echo "<td><input type='number' name='quantity' value='1' min='1'></td>";
+    }
 
     // If user role is admin and $product is not null show action buttons.
     if (isset($_SESSION["role"]) && $_SESSION["role"] == "admin" && $product->getId() != null) {
@@ -161,53 +154,66 @@ foreach ($productList as $product) {
         echo "<form method='post' id='removeForm{$product->getId()}'>";
         echo "<input type='hidden' name='id' value='{$product->getId()}'>";
         echo "<input type='hidden' name='action' value='removeProduct'>";
-        echo "<td><input type='button' value='Remove' onclick='confirmDelete({$product->getId()})'></td>";
+        echo "<td><input type='submit' value='Remove' onclick='confirmDelete({$product->getId()})'></td>";
         echo "</form>";
 
         // Update button
         echo "<form method='post' id='updateForm{$product->getId()}'>";
         echo "<input type='hidden' name='id' value='{$product->getId()}'>";
         echo "<input type='hidden' name='action' value='updateProduct'>";
-        echo "<td><input type='button' value='Update' onclick='updateProduct({$product->getId()})'></td>";
+        echo "<td><input type='submit' value='Update' onclick='updateProduct({$product->getId()})'></td>";
         echo "</form>";
     }
+    
+    if (isset($_SESSION["role"]) && $_SESSION["role"] == "registered" && $product->getId() != null) {
+
+        // Buy new product button
+        echo "<form method='post' id='buyForm{$product->getId()}'>";
+        echo "<input type='hidden' name='id' value='{$product->getId()}'>";
+        echo "<input type='hidden' name='action' value='buyProduct'>";
+        echo "<td><input type='number' name='quantity' value='1'></td>";
+        echo "<td id='actionBuy'><input type='submit' value='Buy' ></td>";
+        echo "</form>";
+    }
+    
     echo "</tr>";
-    echo "</form>";
 }
-echo "</table>";
+echo "</table>"; 
+
 
 
 $message = null;
 
 // Display a message when product is deleted
 if (isset($_SESSION["deleted"])){
-    unset($_SESSION["search_show"]);
     $message = $_SESSION["deleted"];
     unset($_SESSION["deleted"]);
 }
 
 // Display a message when product is updated
 if (isset($_SESSION["updated"])){
-    unset($_SESSION["search_show"]);
-    unset($_SESSION["deleted"]);
     $message = $_SESSION["updated"];
     unset($_SESSION["updated"]);
 }
 
 // Display a message when product is added
 if (isset($_SESSION["added"])){
-    unset($_SESSION["search_show"]);
-    unset($_SESSION["deleted"]);
     $message = $_SESSION["added"];
     unset($_SESSION["added"]);   
 }
 
 // Display a message when product is not found
 if (isset($_SESSION["search_show"])){
-    unset($_SESSION["deleted"]);
     $message = $_SESSION["search_show"];
     unset($_SESSION["search_show"]);
 }
+
+if (isset($_SESSION["buyError"])){
+    $message = $_SESSION["buyError"];
+    unset($_SESSION["buyError"]);
+}
+
+
 
 echo $message;
 ?>
