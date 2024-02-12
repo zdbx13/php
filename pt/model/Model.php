@@ -69,7 +69,6 @@ class Model {
      */
     public function insertUser(User $user):bool {
         $added = true;
-        //var_dump($user);
         if (!is_null($user)){
             $check = true;
             
@@ -312,7 +311,7 @@ class Model {
     * -------------------------------
     * ORDER
     * -------------------------------
-    */
+    */  
 
     /**
      * finds all diferents delivery methods in orders table.
@@ -322,5 +321,65 @@ class Model {
         $order = $this->orderDataSource->selectDelMethods();
         return $order;
     }
+
+
+    /**
+    * retrieves max id order from data source.
+    * @return Order with the max id
+    */
+    public function selectMaxId():Order {
+        return $this->orderDataSource->selectMaxId();
+    }
     
+    
+    /**
+     * Check the data to add in the data sourece is valid to add.
+     * @param array array with data to dadd in the order.
+     * @return bool ture if added, false if not added.
+     */
+    public function insertOrder(array $order):bool{
+        $added = false;
+
+        if (!empty($order)){
+            $empty  = false;
+
+            foreach ($order as $ord){
+                if (empty($ord)){
+                    $added = false;
+                    $empty = true;
+                }
+            }
+
+            if (!$empty){
+                $added = $this->orderDataSource->insertOrder($order);
+            }
+        }
+
+        return $added;
+    }
+
+
+    /**
+     * Check the data to add in the data sourece is valid to add.
+     * @param array array with data to add.
+     * @return bool ture if added, false if not added.
+     */
+    public function insertOrderDetails(array $order):bool{
+        $added = false;
+
+        if (!empty($order)){
+            $empty = false;
+            
+            foreach ($order as $ord){
+                if (empty($ord)){
+                    $added = false;
+                    $empty = true;
+                }
+            }
+            
+            if (!$empty){
+                return $this->orderDataSource->insertOrderDetails($order);
+            }
+        }        
+    }
 }

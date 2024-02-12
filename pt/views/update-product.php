@@ -29,7 +29,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 /** If not admin redirect to index.php */
 if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION["role"]) && $_SESSION["role"] != "admin" || $_SESSION["role"] == null ) {
     header("Location: index.php");
-    //var_dump($_SESSION["username"]);
     exit();
 }
 

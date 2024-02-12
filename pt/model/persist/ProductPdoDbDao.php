@@ -130,7 +130,6 @@ class ProductPdoDbDao implements ProductDaoInterface {
 
                     try {
                         $row = $stmt->fetchAll();
-                        //var_dump($row[0]["id"]);
                         $data = new Product($row[0]['id'], $row[0]['code'], $row[0]['description'], $row[0]['price']);
 
                     } catch (PDOException $e) {
@@ -167,7 +166,6 @@ class ProductPdoDbDao implements ProductDaoInterface {
 
                     try {
                         $row = $stmt->fetchAll();
-                        //var_dump($row[0]["id"]);
                         $data = new Product($row[0]['id'], $row[0]['code'], $row[0]['description'], $row[0]['price']);
 
                     } catch (PDOException $e) {
@@ -190,7 +188,7 @@ class ProductPdoDbDao implements ProductDaoInterface {
     /**
      * Insert a product in the BBDD.
      * @param Product product to add.
-     * @return bool true if add the user, false if no add them.
+     * @return bool true if add the product, false if no add them.
      */
     public function insert(Product $product): bool {
         $added = false;
@@ -263,13 +261,10 @@ class ProductPdoDbDao implements ProductDaoInterface {
      */
     public function selectLikeDescription(Product $product): bool|array {
         $data = false;
-        //var_dump($product);
         try {
             $stmt = $this->connection->prepare($this->queries['SELECT_LIKE_DESCRIPTION']);
-            //var_dump($stmt);
             $stmt->bindValue(':description', "%".$product->getDescription()."%", PDO::PARAM_STR);
             $success = $stmt->execute();
-            //var_dump($success);
             if ($success) {
                 if ($stmt->rowCount() > 0) {
                     $stmt->setFetchMode(PDO::FETCH_ASSOC); //PDO::FETCH_ASSOC provides a consistent interface for accessing databases in PHP

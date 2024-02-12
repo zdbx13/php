@@ -21,17 +21,16 @@ class OrderPdoDbDao implements OrderDaoIntarface {
                     "SELECT DISTINCT delMethod FROM %s;", 
                     self::$TABLE_NAME
             );
-            $this->queries['INSERT'] = \sprintf(
-                    "insert into %s values (:id, :code, :description, :price)", 
+            $this->queries['INSERT_ORDER'] = \sprintf(
+                    "insert into %s (delMethod, customer) values (:delMethod, :customer)", 
                     self::$TABLE_NAME
             );
-            $this->queries['UPDATE'] = \sprintf(
-                    "update %s set code = :code, description = :description, price = :price where id = :id", 
+            $this->queries['SELECT_MAX_ID'] = \sprintf(
+                    "SELECT MAX(id) AS max_id FROM %s", 
                     self::$TABLE_NAME
             );
-            $this->queries['DELETE'] = \sprintf(
-                    "delete from %s where id = :id", 
-                    self::$TABLE_NAME
+            $this->queries['INSERT_ORDER_DETAILS'] = \sprintf(
+                "insert into orderproducts (orderId, productId, quantity, unitPrice) values (:orderId, :productId, :quantity, :unitPrice)", 
             );   
                         
         } catch (PdoException $e) {
@@ -46,7 +45,7 @@ class OrderPdoDbDao implements OrderDaoIntarface {
     /**
      * Singleton implementation of user ADO.
      * perfoms persistance in session.
-     * @return DbProductDao the single instance of this object.
+     * @return DborderDao the single instance of this object.
      */
     public static function getInstance() {
         if( self::$instance == null ) {
@@ -57,7 +56,7 @@ class OrderPdoDbDao implements OrderDaoIntarface {
 
 
 
-  /**
+    /**
      * Select all the orders in the orders table. 
      * @return array an empty array if not find nothing or an array with the orders founded.
     */
@@ -73,10 +72,9 @@ class OrderPdoDbDao implements OrderDaoIntarface {
                     try {
                         $rows = $stmt->fetchAll();
             
-                        // Map the results to the Product object manually
+                        // Map the results to the order object manually
                         $data = [];
                         foreach ($rows as $row) {
-                            //var_dump($row);
                             $data[] = new Order(null, null, $row['delMethod']);
                         }
                     } catch (PDOException $e) {
@@ -96,5 +94,87 @@ class OrderPdoDbDao implements OrderDaoIntarface {
     }
 
 
+
+
+    /**
+     * Select max id in the table. 
+     * @return Order the order with the max id in the table.
+    */
+    public function selectMaxId(): Order{
+        $data = false;
+        try {
+            $stmt = $this->connection->prepare($this->queries['SELECT_MAX_ID']);
+            $success = $stmt->execute();
+            if ($success) {
+                if ($stmt->rowCount()>0) {
+                    $stmt->setFetchMode(PDO::FETCH_ASSOC); //PDO::FETCH_ASSOC provides a consistent interface for accessing databases in PHP
+
+                    try {
+                        $row = $stmt->fetchAll();
+                        $data = new Order($row[0]['max_id']);
+
+                    } catch (PDOException $e) {
+                        // Handle the exception
+                        echo "Error: " . $e->getMessage();
+                    }  
+                } else {
+                    $data = false;
+                }
+            } else {
+                $data = false;
+            }
+
+        } catch (PDOException $e) {
+        }   
+        return $data;
+    }
+
+
+    /**
+     * Insert a order in the BBDD.
+     * @param array with order data to  add.
+     * @return bool true if add, false if no add them.
+     */
+    public function insertOrder(array $order): bool {
+        $added = false;
+
+        try {
+            $stmt = $this->connection->prepare($this->queries['INSERT_ORDER']);
+            $stmt->bindValue(':delMethod', $order[0], PDO::PARAM_STR);
+            $stmt->bindValue(':customer', $order[1], PDO::PARAM_INT);
+            $success = $stmt->execute();
+            $added  = $success?true:fasle;
+        } catch (PDOException $e) {
+            echo $e->getTraceAsString();
+            $added  = false;
+        }
+        return $added ;
+    }
+
+
+     /**
+     * Insert a order  details in the BBDD.
+     * @param array with order data to  add.
+     * @return bool true if add, false if no add them.
+     */
+    public function insertOrderDetails(array $order): bool {
+        $added = false;
+        try {
+            $stmt = $this->connection->prepare($this->queries['INSERT_ORDER_DETAILS']);
+            $stmt->bindValue(':orderId', $order[0], PDO::PARAM_INT);
+            $stmt->bindValue(':productId', $order[1], PDO::PARAM_INT);
+            $stmt->bindValue(':quantity', $order[2], PDO::PARAM_INT);
+            $stmt->bindValue(':unitPrice', $order[3], PDO::PARAM_STR);
+    
+            $success = $stmt->execute();
+            $added = $success ? true : false;
+        } catch (PDOException $e) {
+            echo $e->getTraceAsString();
+            $added = false;
+        }
+    
+        return $added;
+    }
+    
 }
 ?>

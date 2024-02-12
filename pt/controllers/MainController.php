@@ -2,6 +2,7 @@
 
 require_once "lib/ViewLoader.php";
 require_once "model/Model.php";
+//require_once "views/cart.php";
 
 
 /**
@@ -19,7 +20,7 @@ class MainController {
     }
 
     public function processRequest(){
-        var_dump($_SERVER['REQUEST_METHOD']);
+        //var_dump($_SERVER['REQUEST_METHOD']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $this->processGetRequest();
@@ -37,7 +38,7 @@ class MainController {
         if (filter_has_var(INPUT_GET, "action")){
             $this->action = filter_input(INPUT_GET, "action");
         }
-        var_dump($this->action);
+        //var_dump($this->action);
     
         switch ($this->action) {
             case "home":
@@ -81,12 +82,15 @@ class MainController {
             $this->updateProduct($productId);
         }
 
-        //var_dump($_POST);
-        var_dump($this->action);
+        //var_dump($this->action);
 
         switch ($this->action) {
             case "buyProduct":
                 $this->buyProduct();
+                break;
+
+            case "confirmBuy":
+                $this->confirmBuy();
                 break;
 
             case "cancelBuyForm":
@@ -183,7 +187,6 @@ class MainController {
     /** Update the product data */
     public function update(){
 
-        //var_dump($_POST);
         $id = $_POST["id"];
         $code = $_POST["code"];
         $desc = $_POST["Description"];
@@ -268,41 +271,34 @@ class MainController {
 
         } else {
 
-            // Defina an array and the session to save the cart data.
             $sessionData = array();
             $_SESSION["buyProduct"] = isset($_SESSION["buyProduct"]) ? $_SESSION["buyProduct"] : null;
             
-            /** If the session is null create an array of arrays and save the firts product in the session. */
+            /** If the session is null create an array and save the first product in the session. */
             if ($_SESSION["buyProduct"] == null) {
                 $sessionData[] = array($product, $quantity);
                 $_SESSION["buyProduct"] = serialize($sessionData);
-                //var_dump($_SESSION["buyProduct"]);
 
-            /** If session is not null add the new product data in the end of the session. */
+            /** If the session is not null add the new product data at the end of the session. */
             } else {
-
-                $productsList = $_SESSION["buyProduct"];
+                $productsList = isset($_SESSION["buyProduct"]) ? unserialize($_SESSION["buyProduct"]) : array();
                 $sessionData = array($product, $quantity);
-                $updatedList = array_merge($productsList, array($sessionData));
 
-                //var_dump($updatedList);
+                $updatedList = array_merge($productsList, array($sessionData));
                 $_SESSION["buyProduct"] = serialize($updatedList);
-                //var_dump($_SESSION["buyProduct"]);
             }
-            
 
             $_SESSION["buyError"] = "Product added to the cart";
         }
         
-        //var_dump($_POST["action"]);
-        //var_dump($quantity);
-        //var_dump($product);
-
         $this->listAllProducts();
 
     }
 
 
+    /** 
+     * Delete the buyProduct session.
+     */
     public function cancelOrder(){
         /** Start session if not started */
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -314,6 +310,42 @@ class MainController {
 
         $this->home();       
         
+    }
+
+
+    /**
+     * Give the order data and insert them in the tables with the corresponding data
+     */
+    public function confirmBuy(){
+        /** Start session if not started */
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_name("login");
+            session_start();
+        }
+
+        // Recive userDataBuy session data
+        $userData = unserialize($_SESSION["userDataBuy"]);
+        
+        // Prepare to insert the new order
+        $insertOrders = array($userData[3], (int)$userData[0]);
+        $this->Model->insertOrder($insertOrders);
+
+        // Select the new order id
+        $maxId = $this->Model->selectMaxId();
+
+        // Recive the BuyProductData session data
+        $proudctsList = unserialize($_SESSION["BuyProductData"]);
+        
+        // Prepare to add the detais of the new order
+        foreach ($proudctsList as $product){
+            foreach ($product as $prd){
+         
+                $insertOrderDetails = array($maxId->getId(), $prd[0]->getId(), (float)$prd[1], $prd[0]->getPrice());
+                $this->Model->insertOrderDetails($insertOrderDetails);
+            }
+        }
+
+        $this->cart();
     }
 
 

@@ -27,12 +27,6 @@ function confirmDelete(productId) {
     }
 }
 
-/** submit the update form action */
-/*function updateProduct(id) {
-    let form = document.getElementById("updateForm" + id);
-    form.submit();
-}*/
-
 /** Submit add form */
 function addProduct() {
     let form = document.getElementById("addProduct");
@@ -50,13 +44,6 @@ function searchProduct() {
 <h2>List all Products</h2>
 
 <?php
-/** If action is update update product */
-/*if (isset($_SESSION["role"]) && $_SESSION["role"] != "admin" && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
-            
-    (new MainController())->updateProduct(new Product($_POST["id"]));
-    exit();
-}*/
-
 /** If action is addProduct  */
 if (isset($_SESSION["role"]) && $_SESSION["role"] != "admin" && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'addProduct') {
     
@@ -105,7 +92,6 @@ $productList = null;
   */
 if (isset($_SESSION["search_results"]) && is_array($_SESSION["search_results"]) && !empty($_SESSION["search_results"])) {
 
-    //var_dump($_SESSION["search_results"]);
     $productList = $_SESSION["search_results"];
     unset($_SESSION["search_results"]);
 
@@ -148,12 +134,6 @@ foreach ($productList as $product) {
     echo "<td><input type='text' disabled name='code' value='{$product->getCode()}'></td>";
     echo "<td><input type='text' disabled name='description' value='{$product->getDescription()}'></td>";
     echo "<td><input type='text' disabled name='price' value='{$product->getPrice()}€'></td>";
-
-    if (isset($_SESSION["role"]) && $_SESSION["role"] == "registered" && $product->getId() != null) {
-        
-        // Quntity field
-        //echo "<td><input type='number' name='quantity' value='1' min='1'></td>";
-    }
 
     // If user role is admin and $product is not null show action buttons.
     if (isset($_SESSION["role"]) && $_SESSION["role"] == "admin" && $product->getId() != null) {

@@ -10,8 +10,6 @@ session_start();
 // If user logged show the logout option and hidde the login option
 if (isset($_SESSION["username"])) {
 
-    //var_dump($_SESSION["username"]);
-    //var_dump($_SESSION["role"]);
     
     if (isset($_SESSION["role"]) && $_SESSION["role"] == "registered"){
         echo "<li><a href='index.php?action=cart'>Cart</a></li>";

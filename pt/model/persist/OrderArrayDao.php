@@ -36,11 +36,38 @@ class OrderArrayDao implements OrderDaoIntarface {
 
      /**
      * retrieves all products from data source.
-     * @return array of products
+     * @return array of orders
      */
     public function selectDelMethods():array {
         return $this->OrdersDb->selectDelMethods();
     }
 
+
+    /**
+     * retrieves max id order from data source.
+     * @return Order with the max id
+     */
+    public function selectMaxId():Order {
+        return $this->OrdersDb->selectMaxId();
+    }
+
+
+    /**
+     * Add a order in the data source.
+     * @param array array with data to dadd in the order.
+     * @return bool ture if added, false if not added.
+     */
+    public function insertOrder(array $order):bool{
+        return $this->OrdersDb->insertOrder($order);
+    }
+
+    /**
+     * Add order details in the data source.
+     * @param array array with data to add.
+     * @return bool ture if added, false if not added.
+     */
+    public function insertOrderDetails(array $order):bool{
+        return $this->OrdersDb->insertOrderDetails($order);
+    }
 
 }

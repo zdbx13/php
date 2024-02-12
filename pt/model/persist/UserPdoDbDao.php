@@ -122,7 +122,6 @@ class UserPdoDbDao implements UserDaoInterface {
 
                     try {
                         $row = $stmt->fetchAll();
-                        //var_dump($row[0]["id"]);
                         $data = new User($row[0]['id'], $row[0]['username'], $row[0]['password'], $row[0]['role'], $row[0]['email'], new DateTime($row[0]['dob']));
 
                     } catch (PDOException $e) {
@@ -264,7 +263,6 @@ class UserPdoDbDao implements UserDaoInterface {
 
                     try {
                         $row = $stmt->fetchAll();
-                        //var_dump($row[0]["id"]);
                         $data = new User($row[0]['id'], $row[0]['username'], $row[0]['password'], $row[0]['role'], $row[0]['email'], new DateTime($row[0]['dob']));
 
                     } catch (PDOException $e) {

@@ -2,7 +2,6 @@
 /** If not admin redirect to index.php */
 if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION["role"]) && $_SESSION["role"] != "admin" || $_SESSION["role"] == null ) {
     header("Location: index.php");
-    //var_dump($_SESSION["username"]);
     exit();
 }
 
@@ -21,9 +20,7 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION["role"]) && $_SES
     // $params contains variables passed in from the controller.
     foreach ($userList as $user) {
         $dob = $user->getDob();
-        //var_dump($dob instanceof DateTime);
         $fdob = $dob->format('Y-m-d');
-        //var_dump($fdob);
         echo <<<EOT
         <tr>
             <td>{$user->getId()}</td>

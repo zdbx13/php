@@ -14,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     // Verify user credentials
     $user = new User(0,$_POST["username"], $_POST["password"]);
     $credentials = (new Model())->selectCredentials($user);
-    //var_dump($credentials);
 
     if ($credentials) {
 
@@ -22,7 +21,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         $_SESSION["role"] = $credentials->getRole();
         $_SESSION["userData"] = serialize($credentials);
   
-        //var_dump($_SESSION["username"]);
         // Redirect after setting session
         header("Location: index.php");
         exit();

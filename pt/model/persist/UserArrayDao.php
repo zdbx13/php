@@ -66,7 +66,6 @@ class UserArrayDao implements UserDaoInterface {
             $message = $this->UserDb->insert($user);
         } else {
             $message = "Username already exist";
-            var_dump($message);
         }
 
         return $message;
@@ -86,7 +85,6 @@ class UserArrayDao implements UserDaoInterface {
             $message = $this->UserDb->delete($user);
         } else {
             $message = "User not found";
-            var_dump($message);
         }
         return $message;
     }
